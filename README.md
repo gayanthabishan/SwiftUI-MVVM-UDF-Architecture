@@ -48,7 +48,7 @@ MVVMTests/
 ## 🔄 Data Flow
 
 ```
-
+<img width="997" alt="data flow" src="https://github.com/user-attachments/assets/0757a3d0-2411-4b57-ac75-8f6b35dba6be" />
 ```
 
 1. **View** calls a function in the `ViewModel`

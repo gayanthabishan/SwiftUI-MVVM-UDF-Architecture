@@ -93,7 +93,7 @@ A SwiftUI view that reacts to:
 - `error(for: .fetchFollowers)` to show error message
 - `@Published` data (`followers`) for UI display
 
-## 🛠 How to Add a New Action
+## How to Add a New Action
 
 To fetch a new resource, e.g., **User Profile**:
 
@@ -150,7 +150,7 @@ if viewModel.isLoading(for: .fetchUserProfile) {
 }
 ```
 
-## 🔍 Tracking Events (Optional)
+## Tracking Events (Optional)
 
 Override `onStatusUpdate` to track the status of actions:
 

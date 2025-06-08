@@ -26,7 +26,7 @@ This approach enhances the **maintainability**, **readability**, and **debuggabi
 - **Easy State Verification**: No need to guess—just assert published values and track what changed and why.
 - **Fully Unit test coverage with bolerplate code**: just use the same `FollowersViewModelTests.swift` as a boilerplate. Each action needs only three test cases for fully coverage. success, failure and lifecycle tracked.
 
-## 📦 Folder Structure
+## Folder Structure
 
 ```
 MVVM
@@ -45,7 +45,7 @@ MVVMTests/
 │   └── FollowersViewModelTests.swift
 ```
 
-## 🔄 Data Flow
+## Data Flow
 
 <img width="997" alt="data flow" src="https://github.com/user-attachments/assets/b0c7c0b8-f500-48c4-92f9-61372fc8a907" />  <br>
 
@@ -58,7 +58,7 @@ MVVMTests/
    - `onStatusUpdate(actionId:isLoading:)` is invoked for tracking/logging
 6. The **View** reacts to `@Published` states (data, loading, or error)
 
-## 🧠 Layers Explained
+## Layers Explained
 
 ### `BaseViewModel`
 
@@ -166,12 +166,12 @@ Great for:
 - Logging durations
 - Analytics pipelines
 
-## ✨ Final Thoughts
+## Final Thoughts
 
 This pattern scales well with apps that deal with multiple async states, API calls, and user-driven actions.
 
 It allows **new developers to understand the flow quickly** while giving **senior developers full flexibility** and control over async logic and side effects.
 
-## 📬 Contributions
+## Contributions
 
 PRs, issues, and ideas are welcome to improve this pattern further.

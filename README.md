@@ -50,6 +50,7 @@ MVVMTests/
 <img width="997" alt="data flow" src="https://github.com/user-attachments/assets/b0c7c0b8-f500-48c4-92f9-61372fc8a907" />
 
 
+
 1. **View** calls a function in the `ViewModel`
 2. **ViewModel** uses `dispatch(actionId:task:)` to perform the async task
 3. The loader state is automatically updated via `setLoading(true/false)`

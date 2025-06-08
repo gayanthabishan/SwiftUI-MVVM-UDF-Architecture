@@ -47,9 +47,8 @@ MVVMTests/
 
 ## 🔄 Data Flow
 
-```
-<img width="997" alt="data flow" src="https://github.com/user-attachments/assets/9aef9c2d-66a8-404f-911f-ae7f9a001167" />
-```
+<img width="997" alt="data flow" src="https://github.com/user-attachments/assets/b0c7c0b8-f500-48c4-92f9-61372fc8a907" />
+
 
 1. **View** calls a function in the `ViewModel`
 2. **ViewModel** uses `dispatch(actionId:task:)` to perform the async task

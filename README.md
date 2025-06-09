@@ -1,5 +1,5 @@
 
-# SwiftUI MVVM Architecture with Centralized Async Action Handling
+# Action-Driven MVVM Architecture for SwiftUI with Clean Async Handling
 
 ## Why This Pattern?
 

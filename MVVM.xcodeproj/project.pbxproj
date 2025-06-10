@@ -40,11 +40,6 @@
 			path = MVVMTests;
 			sourceTree = "<group>";
 		};
-		D2FC551F2DF5AEDA00E0758F /* MVVMUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MVVMUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,7 +72,6 @@
 			children = (
 				D2FC55062DF5AED900E0758F /* MVVM */,
 				D2FC55152DF5AEDA00E0758F /* MVVMTests */,
-				D2FC551F2DF5AEDA00E0758F /* MVVMUITests */,
 				D2FC55052DF5AED900E0758F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -152,9 +146,6 @@
 			);
 			dependencies = (
 				D2FC551E2DF5AEDA00E0758F /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				D2FC551F2DF5AEDA00E0758F /* MVVMUITests */,
 			);
 			name = MVVMUITests;
 			packageProductDependencies = (

@@ -9,7 +9,7 @@ import XCTest
 @testable import MVVM
 
 // MARK: - Mock Service conforming to NetworkServiceType
-class MockNetworkService: NetworkServiceType {
+class MockNetworkService: NetworkServiceProtocol {
     var shouldFail = false
     
     // Simulates network call to fetch followers

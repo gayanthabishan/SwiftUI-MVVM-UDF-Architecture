@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct NetworkService: NetworkServiceType {
+struct NetworkService: NetworkServiceProtocol {
     func fetchFollowers(username: String) async throws -> [Follower] {
         guard let url = URL(string: "https://api.github.com/users/\(username)/followers") else {
             throw URLError(.badURL)
@@ -18,6 +18,6 @@ struct NetworkService: NetworkServiceType {
     }
 }
 
-public protocol NetworkServiceType {
+public protocol NetworkServiceProtocol {
     func fetchFollowers(username: String) async throws -> [Follower]
 }

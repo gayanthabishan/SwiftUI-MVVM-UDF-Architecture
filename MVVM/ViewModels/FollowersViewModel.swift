@@ -13,9 +13,9 @@ class FollowersViewModel: BaseViewModel<FollowersActionId> {
     @Published var followers: [Follower] = []
     
     //network injection
-    private let service: NetworkServiceType
+    private let service: NetworkServiceProtocol
     
-    init(service: NetworkServiceType = NetworkService()) {
+    init(service: NetworkServiceProtocol = NetworkService()) {
         self.service = service
     }
     

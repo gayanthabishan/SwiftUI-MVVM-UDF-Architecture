@@ -69,8 +69,7 @@ class FollowersViewModel: BaseViewModel<FollowersActionId> {
              self.isPageLoading = false
 
              if !failure.isEmpty {
-                 print("Retry failed actions: \(failure)")
-                 // You can show retry UI or log analytics here
+                 // Handle fallback UI or show retry buttons/logics
              }
          }
      }

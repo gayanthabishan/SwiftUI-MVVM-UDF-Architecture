@@ -41,6 +41,41 @@ class FollowersViewModel: BaseViewModel<FollowersActionId> {
          */
     }
     
+    
+    // MARK: - Example Usage of dispatchGroup in ViewModel
+    /*
+     This method demonstrates how to fetch multiple independent data sources
+      in parallel using BaseViewModel's dispatchGroup(...) helper.
+
+      It:
+      - Automatically tracks individual loading/error states via `BaseViewModel.dispatch(...)`
+      - Executes all tasks in parallel
+      - Waits until all tasks complete (regardless of success or failure)
+      - Hides the full-page loader once all tasks are done
+      - Optionally handles any failed actionIds for retries or fallback logic
+
+      Useful for scenarios like initial screen load where you show a shimmer/skeleton until all major data is ready.
+     */
+    /*
+     @Published var isPageLoading = false
+     func loadHomeScreen() {
+         isPageLoading = true
+
+         dispatchGroup([
+             (.fetchBanners, fetchBanners),
+             (.fetchCategories, fetchCategories),
+             (.fetchEvents, fetchEvents)
+         ]) { success, failure in
+             self.isPageLoading = false
+
+             if !failure.isEmpty {
+                 print("Retry failed actions: \(failure)")
+                 // You can show retry UI or log analytics here
+             }
+         }
+     }
+     */
+    
     // Called on successful completion of any dispatch
     override func onSuccess<T>(actionId: FollowersActionId, result: T) {
         switch actionId {

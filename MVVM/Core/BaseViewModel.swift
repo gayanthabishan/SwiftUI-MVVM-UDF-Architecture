@@ -71,6 +71,39 @@ class BaseViewModel<ActionId: ActionIdType>: ObservableObject {
         }
     }
     
+    /// Dispatches multiple async tasks in parallel, tracking each action individually.
+    /// Calls the completion with success and failure lists when all tasks are done.
+    /// - Parameters:
+    ///   - actionsWithTasks: Array of (ActionId, async task)
+    ///   - onFinishedAll: Closure with success/failure ActionId arrays
+    func dispatchGroup<T>(
+        _ actionsWithTasks: [(ActionId, () async throws -> T)],
+        onFinishedAll: @escaping (_ success: [ActionId], _ failure: [ActionId]) -> Void
+    ) {
+        let group = DispatchGroup()
+        var successActions: [ActionId] = []
+        var failedActions: [ActionId] = []
+        let lock = NSLock()
+
+        for (actionId, task) in actionsWithTasks {
+            group.enter()
+            dispatch(actionId: actionId, task: task) { result in
+                lock.lock()
+                if result != nil {
+                    successActions.append(actionId)
+                } else {
+                    failedActions.append(actionId)
+                }
+                lock.unlock()
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            onFinishedAll(successActions, failedActions)
+        }
+    }
+    
     // MARK: overriding methods from child view modela
     
     /// Called when the async task completes successfully

@@ -7,7 +7,7 @@
 
 import Foundation
 
-class FollowersViewModel: BaseViewModel<FollowersActionId> {
+class FollowersViewModel: BaseViewModel<FollowersActions, FollowersUIActions> {
     
     //data
     @Published var followers: [Follower] = []
@@ -20,7 +20,7 @@ class FollowersViewModel: BaseViewModel<FollowersActionId> {
     }
     
     // Method to start fetching followers asynchronously
-    func getFollowers(for username: String) {
+    func fetchFollowers(for username: String) {
         
         //suggested flow of just dispatching and catching results in onSuccess method
         dispatch(actionId: .fetchFollowers, task: {
@@ -29,18 +29,7 @@ class FollowersViewModel: BaseViewModel<FollowersActionId> {
             try await Task.sleep(nanoseconds: 1_000_000_000)
             return try await self.service.fetchFollowers(username: username)
         })
-        
-        /// **incase for some reason if you need to handle result right in the local method and do only the UI changes in onSuccess method**
-        /*
-        dispatch(actionId: .fetchFollowers, task: {
-            try await self.service.fetchFollowers(username: username)
-        }, onFinished: { [weak self] result in
-            guard let followers = result else { return }
-            self?.followers = followers
-        })
-         */
     }
-    
     
     // MARK: - Example Usage of dispatchGroup in ViewModel
     /*
@@ -57,26 +46,18 @@ class FollowersViewModel: BaseViewModel<FollowersActionId> {
       Useful for scenarios like initial screen load where you show a shimmer/skeleton until all major data is ready.
      */
     /*
-     @Published var isPageLoading = false
      func loadHomeScreen() {
-         isPageLoading = true
-
          dispatchGroup([
-             (.fetchBanners, fetchBanners),
-             (.fetchCategories, fetchCategories),
-             (.fetchEvents, fetchEvents)
-         ]) { success, failure in
-             self.isPageLoading = false
-
-             if !failure.isEmpty {
-                 // Handle fallback UI or show retry buttons/logics
-             }
-         }
+             (.fetchBanners, wrap(self.eventsHomeRepository.fetchBanners)),
+             (.fetchCategories, wrap(self.eventsHomeRepository.fetchCategories))
+         ]) { success, failure in }
      }
      */
     
     // Called on successful completion of any dispatch
-    override func onSuccess<T>(actionId: FollowersActionId, result: T) {
+    override func onSuccess<T>(actionId: FollowersActions, result: T) {
+        print("[Analytics] Action: \(actionId) got success UIs updated at \(actionId.analyticsEventInfo.timeStamp)")
+        
         switch actionId {
         case .fetchFollowers:
             if let followers = result as? [Follower] {
@@ -87,7 +68,9 @@ class FollowersViewModel: BaseViewModel<FollowersActionId> {
     }
     
     // Called on error for any dispatch
-    override func onError(actionId: FollowersActionId, error: Error) {
+    override func onError(actionId: FollowersActions, error: Error) {
+        print("[Analytics] Action: \(actionId) got failed UIs updated at \(actionId.analyticsEventInfo.timeStamp)")
+        
         switch actionId {
         case .fetchFollowers:
             print("Failed to fetch followers: \(error.localizedDescription)")
@@ -98,10 +81,21 @@ class FollowersViewModel: BaseViewModel<FollowersActionId> {
     // Called whenever the loading state changes for a specific action
     // This is not mandotory to override but it's there if you need to do something while doing an action
     // example : centralized event trail hook to log or track the lifecycle of actions
-    override func onStatusUpdate(actionId: FollowersActionId, isLoading: Bool) {
-        switch actionId {
-        case .fetchFollowers:
-            print("Loading state for fetchFollowers is \(isLoading)")
+    override func onStatusUpdate(actionId: FollowersActions, isLoading: Bool) {
+        if isLoading {
+            print("Data fetching for \(String(describing: actionId)) action starts \(actionId.analyticsEventInfo.timeStamp)")
+        } else {
+            print("Data fetching for \(String(describing: actionId)) action ends \(actionId.analyticsEventInfo.timeStamp)")
         }
     }
+    
+    // Called whenever UI action dispatched
+    override func onUIAction(_ action: FollowersUIActions) {
+        switch action {
+        case .tappedFollowersButton, .tappedFollowersRetryButton:
+            print("User clicked \(String(describing: action))")
+            fetchFollowers(for: "apple")
+        }
+    }
+    
 }

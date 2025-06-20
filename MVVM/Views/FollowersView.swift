@@ -12,37 +12,49 @@ struct FollowersView: View {
     
     var body: some View {
         NavigationView {
-            // Here we check if the specific loader for fetching followers is active.
-            // Since BaseViewModel tracks loading states per ActionId,
-            // you can similarly track different loaders by passing other action IDs like .fetchBanner or .fetchCategory.
-            if viewModel.isLoading(for: .fetchFollowers) {
-                ProgressView("Loading...")  // Show loading spinner only for fetchFollowers action
-            }
-            // Show error message specifically for fetchFollowers action if any
-            else if let error = viewModel.error(for: .fetchFollowers) {
-                Text("Error: \(error)")
-            } else {
-                // Show followers list when not loading and no error for fetchFollowers
-                List(viewModel.followers) { follower in
-                    HStack {
-                        AsyncImage(url: URL(string: follower.avatar_url)) { image in
-                            image.resizable()
-                        } placeholder: {
-                            ProgressView()
+            VStack {
+                if viewModel.isLoading(for: .fetchFollowers) {
+                    ProgressView("Loading...")
+                        .frame(maxHeight: .infinity)
+                } else if let error = viewModel.error(for: .fetchFollowers) {
+                    VStack {
+                        Text("Error: \(error)")
+                            .foregroundColor(.red)
+                        Button("Retry") {
+                            viewModel.triggerUIAction(actionId: .tappedFollowersRetryButton)
                         }
-                        .frame(width: 40, height: 40)
-                        .clipShape(Circle())
-                        
-                        Text(follower.login)
+                        .padding(.top)
+                    }
+                    .frame(maxHeight: .infinity)
+                } else if viewModel.followers.isEmpty {
+                    VStack {
+                        Text("No followers found.")
+                            .foregroundColor(.gray)
+                        Button("Load Followers") {
+                            viewModel.triggerUIAction(actionId: .tappedFollowersButton)
+                        }
+                        .padding(.top)
+                    }
+                    .frame(maxHeight: .infinity)
+                } else {
+                    List(viewModel.followers) { follower in
+                        HStack {
+                            AsyncImage(url: URL(string: follower.avatar_url)) { image in
+                                image.resizable()
+                            } placeholder: {
+                                ProgressView()
+                            }
+                            .frame(width: 40, height: 40)
+                            .clipShape(Circle())
+                            
+                            Text(follower.login)
+                        }
                     }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .navigationTitle("Followers")
-        .onAppear {
-            // Triggers loading followers, this will toggle the loader tracked by .fetchFollowers ActionId
-            viewModel.getFollowers(for: "apple")
-        }
     }
 }
 

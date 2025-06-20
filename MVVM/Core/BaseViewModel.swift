@@ -1,14 +1,52 @@
 //
 //  BaseViewModel.swift
-//  MVVM
+//  PickMePassenger
 //
-//  Created by Bishanm on 2025-06-08.
+//  Created by Bishan on 2025-06-08.
 //
+
+/**
+ ===================================================================
+ WARNING:
+ -------------------------------------------------------------------
+ This file contains core logic shared across the entire architecture.
+ Changes to this file could be catastrophic to the entire project.
+ Handle with extreme caution.
+ ===================================================================
+ 
+ Architecture Overview:
+ This file is part of the SwiftUI-MVVM-UDF-Architecture:
+ https://github.com/gayanthabishan/SwiftUI-MVVM-UDF-Architecture
+ 
+ A lightweight, action-based unidirectional data flow (UDF) architecture
+ without centralized state management. It simplifies asynchronous flow
+ handling within SwiftUI's MVVM layer while preserving clarity and testability.
+ 
+ This project is a minimal version of:
+ https://github.com/gayanthabishan/SwiftUI-UDF-Architecture
+ A fully-fledged UDF architecture with centralized state, middleware,
+ and side-effects handling.
+ 
+ Responsibilities of BaseViewModel:
+ - Defines a generic `ActionId`-driven architecture for representing async user intentions
+ - Provides a standardized way to dispatch async tasks via `dispatch(...)`
+ - Offers `dispatchGroup(...)` to run multiple async tasks in parallel and wait for all to complete
+ - Useful for screen-level loaders (e.g., one shimmer until all data loads)
+ - Automatically tracks success/failure of each action
+ - Manages per-action loading states (`loadingStates`) with @Published updates
+ - Tracks per-action error messages (`errorMessages`) and a general UI-bound error (`errorMessage`)
+ - Offers overridable hooks:
+ - `onSuccess` to handle successful responses
+ - `onError` to handle error cases
+ - `onStatusUpdate` for loading state changes
+ - Ensures all UI updates and published changes happen on the main actor
+ - Encapsulates UI-safe logic and avoids duplication across ViewModels
+ */
 
 import Foundation
 
 @MainActor
-class BaseViewModel<ActionId: ActionIdType>: ObservableObject {
+class BaseViewModel<ActionId: ActionIdType, UIAction: UIActionType>: ObservableObject {
     /// Tracks loading states for each action
     @Published private(set) var loadingStates: [ActionId: Bool] = [:]
     
@@ -17,6 +55,9 @@ class BaseViewModel<ActionId: ActionIdType>: ObservableObject {
     
     /// General error message for UI display (can be bound to alerts, etc.)
     @Published var errorMessage: String? = nil
+    
+    /// Optional hook for observing errors (used in tests or subclass logic)
+    var onErrorSet: (() -> Void)?
     
     /// Sets the loading state for a specific action
     /// - Parameters:
@@ -84,7 +125,7 @@ class BaseViewModel<ActionId: ActionIdType>: ObservableObject {
         var successActions: [ActionId] = []
         var failedActions: [ActionId] = []
         let lock = NSLock()
-
+        
         for (actionId, task) in actionsWithTasks {
             group.enter()
             dispatch(actionId: actionId, task: task) { result in
@@ -98,13 +139,13 @@ class BaseViewModel<ActionId: ActionIdType>: ObservableObject {
                 group.leave()
             }
         }
-
+        
         group.notify(queue: .main) {
             onFinishedAll(successActions, failedActions)
         }
     }
     
-    // MARK: overriding methods from child view modela
+    // MARK: overriding methods from child view models
     
     /// Called when the async task completes successfully
     /// Override this method in subclasses to handle specific actions and update properties accordingly
@@ -121,6 +162,7 @@ class BaseViewModel<ActionId: ActionIdType>: ObservableObject {
     func onError(actionId: ActionId, error: Error) {
         errorMessages[actionId] = error.localizedDescription
         errorMessage = error.localizedDescription
+        onErrorSet?()
     }
     
     /// Optional hook for reacting to loading state changes per action
@@ -129,4 +171,41 @@ class BaseViewModel<ActionId: ActionIdType>: ObservableObject {
     ///   - actionId: The identifier of the action
     ///   - isLoading: Current loading state
     func onStatusUpdate(actionId: ActionId, isLoading: Bool) {}
+    
+    
+    // MARK: helper methods
+    
+    /// Wraps an async throwing task to ignore its result and return `Void`.
+    /// Useful for `dispatchGroup` when result is not needed but `try await` is required.
+    ///
+    /// Example:
+    /// wrap { try await fetchSomething() }
+    func wrap<T>(_ asyncThrowing: @escaping () async throws -> T) -> () async throws -> Void {
+        return {
+            _ = try await asyncThrowing()
+        }
+    }
+    
+    // MARK: Button action tracking
+    
+    /// Centralized UI action tracking (non-fetch)
+    func dispatchUIAction(_ action: UIAction) {
+        onUIAction(action)
+        logUIAction(action)
+    }
+    
+    /// Button clicks should trigger this inorder to dispatch the action
+    func triggerUIAction(actionId: UIAction) { dispatchUIAction(actionId) }
+    
+    /// Optional override to let subclasses respond to UI actions
+    /// Override in subclasses if needed
+    func onUIAction(_ action: UIAction) {}
+    
+    /// Analytics/logging layer for UI actions
+    func logUIAction(_ action: UIAction) {
+        print("[Analytics] UIAction: \(action.analyticsEventInfo.name) \(action.analyticsEventInfo.timeStamp)")
+        // Plug into Firebase, Mixpanel, etc.
+    }
+    
 }
+

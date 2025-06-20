@@ -92,7 +92,7 @@ A SwiftUI view that reacts to:
 - `error(for: .fetchFollowers)` to show error message
 - `@Published` data (`followers`) for UI display
 
-## How to Add a New Action
+## How to Add a New Date Fetch Action
 
 To fetch a new resource, e.g., **User Profile**:
 
@@ -165,7 +165,7 @@ Great for:
 - Logging durations
 - Analytics pipelines
 
-## Follower Action Flow Examples
+## UI Only Actions
 
 ### UI-Only Action Flow (e.g., tappedFollowersButton)
 

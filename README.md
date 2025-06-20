@@ -1,4 +1,3 @@
-
 # Action-Driven MVVM Architecture for SwiftUI with Clean Async Handling
 
 ## Why This Pattern?
@@ -166,6 +165,76 @@ Great for:
 - Logging durations
 - Analytics pipelines
 
+## Follower Action Flow Examples
+
+### UI-Only Action Flow (e.g., tappedFollowersButton)
+
+This flow is used for pure UI interactions (no API involved):
+
+```
+FollowersView
+ └── Button("Load Followers")
+      └── viewModel.triggerUIActions(actionId: .tappedFollowersButton)
+           └── [Analytics] UIAction: tappedFollowersButton
+```
+
+- Used for logging UI events like taps or navigations.
+- No data fetch or loading indicator involved.
+- Still goes through `BaseViewModel.triggerUIActions` for audit trail or analytics logging.
+- You can optionally use `onUIAction(actionId:)` to respond in the ViewModel.
+
+---
+
+### Fetch Action Flow (e.g., fetchFollowers)
+
+This flow handles an async operation like fetching data from the network:
+
+```
+FollowersView
+ └── Button("Load Followers")
+      └── viewModel.triggerUIActions(actionId: .tappedFollowersButton)
+           └── dispatch(actionId: .fetchFollowers, task: { ... })
+                ├── setLoading(true, for: .fetchFollowers)
+                │    └── onStatusUpdate → "Data fetching for fetchFollowers action starts"
+                ├── Perform async task (e.g. service.fetchFollowers)
+                └── Upon success:
+                     ├── onSuccess(actionId: .fetchFollowers, result: ...)
+                     ├── setLoading(false, for: .fetchFollowers)
+                     │    └── onStatusUpdate → "Data fetching for fetchFollowers action ends"
+                     └── View reacts to @Published data
+```
+
+- Automatically manages loader state and error tracking.
+- View uses:
+  - `isLoading(for: .fetchFollowers)` → show spinner/shimmer
+  - `error(for: .fetchFollowers)` → show error message
+  - `followers` → actual data for the UI
+
+---
+
+### Example Button Logic
+
+```swift
+Button("Load Followers") {
+    print("User clicked tappedFollowersButton")
+    viewModel.triggerUIActions(actionId: .tappedFollowersButton)
+}
+```
+
+In `FollowersViewModel`:
+
+```swift
+override func onUIAction(actionId: FollowersActionId) {
+    switch actionId {
+    case .tappedFollowersButton:
+        dispatch(actionId: .fetchFollowers, task: {
+            try await self.service.fetchFollowers()
+        })
+    default: break
+    }
+}
+```
+
 ## Final Thoughts
 
 This pattern scales well with apps that deal with multiple async states, API calls, and user-driven actions.
@@ -175,3 +244,6 @@ It allows **new developers to understand the flow quickly** while giving **senio
 ## Contributions
 
 PRs, issues, and ideas are welcome to improve this pattern further.
+
+---
+

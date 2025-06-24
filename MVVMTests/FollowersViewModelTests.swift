@@ -29,10 +29,10 @@ final class FollowersViewModelTests: XCTestCase {
     
     // Custom ViewModel to track loading states
     class TrackingViewModel: FollowersViewModel {
-        var statusEvents: [(FollowersActionId, Bool)] = []
+        var statusEvents: [(FollowersActions, Bool)] = []
         
         // Capture every loading state change
-        override func onStatusUpdate(actionId: FollowersActionId, isLoading: Bool) {
+        override func onStatusUpdate(actionId: FollowersActions, isLoading: Bool) {
             statusEvents.append((actionId, isLoading))
             super.onStatusUpdate(actionId: actionId, isLoading: isLoading)
         }
@@ -44,7 +44,7 @@ final class FollowersViewModelTests: XCTestCase {
         let viewModel = TrackingViewModel(service: mockService)
         
         // Start loading
-        viewModel.getFollowers(for: "anyUser")
+        viewModel.fetchFollowers(for: "anyUser")
         
         // Wait for fetch to complete
         try? await Task.sleep(nanoseconds: 1_500_000_000)
@@ -64,7 +64,7 @@ final class FollowersViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isLoading(for: .fetchFollowers))
         
         let expectation = XCTestExpectation(description: "Should complete fetching followers")
-        viewModel.getFollowers(for: "anyUser")
+        viewModel.fetchFollowers(for: "anyUser")
         
         // Wait for fetch to complete
         try? await Task.sleep(nanoseconds: 1_500_000_000)
@@ -86,7 +86,7 @@ final class FollowersViewModelTests: XCTestCase {
         let viewModel = FollowersViewModel(service: mockService)
         
         let expectation = XCTestExpectation(description: "Should handle error when fetch fails")
-        viewModel.getFollowers(for: "anyUser")
+        viewModel.fetchFollowers(for: "anyUser")
         
         // Wait for fetch to complete
         try? await Task.sleep(nanoseconds: 1_500_000_000)
